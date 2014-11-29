@@ -64,11 +64,16 @@ sub export_symbols_to {
 # private
 
 sub _compile_keyword {
-    my ( $self, $keyword, $is_global ) = @_;
+    my ( $self, $keyword, $opts ) = @_;
 
-    my $compiled_code = sub { $self->$keyword(@_); };
+    my $prototype     = $opts->{'prototype'} || '@';
+    my $compiled_code = eval qq{
+        sub($prototype) { \$self->$keyword(\@_); };
+    };
 
-    if ( !$is_global ) {
+    $@ and die "Cannot compile keyword $keyword: $@\n";
+
+    if ( !$opts->{'is_global'} ) {
         my $code = $compiled_code;
         $compiled_code = sub {
             $self->app->has_request or
@@ -87,7 +92,7 @@ sub _construct_export_map {
     foreach my $keyword ( keys %$keywords ) {
         # check if the keyword were excluded from importation
         $args->{ '!' . $keyword } and next;
-        $map{$keyword} = $self->_compile_keyword( $keyword, $keywords->{$keyword}{is_global} );
+        $map{$keyword} = $self->_compile_keyword( $keyword, $keywords->{$keyword} );
     }
     return \%map;
 }
