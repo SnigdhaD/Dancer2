@@ -1,0 +1,15 @@
+<table>
+<th>The Weather in Buffalo, NY, USA</th>
+<tr>
+<td>
+[% FOREACH metric IN metrics.keys %]
+<tr><td>[% metric %]</td><td>[% metrics.$metric %]</td></tr>
+[% END %]
+</td>
+</tr>
+</table>
+
+<hr noshade>
+
+Powered by the <a href = 'http://openweathermap.org/' target = _new>Open W
+eather Map API</a>
